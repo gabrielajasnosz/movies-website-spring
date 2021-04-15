@@ -3,13 +3,18 @@ package pl.edu.pwsztar.domain.dto;
 public class MovieCounterDto {
 
     private final long counter;
-
-    public MovieCounterDto(long counter) {
-        this.counter = counter;
-    }
+//
+//    public MovieCounterDto(long counter) {
+//        this.counter = counter;
+//    }
 
     public long getCounter() {
         return counter;
+    }
+
+    private MovieCounterDto(Builder builder) {
+        counter=builder.counter;
+
     }
 
     @Override
@@ -17,5 +22,26 @@ public class MovieCounterDto {
         return "MovieCounterDto{" +
                 "counter=" + counter +
                 '}';
+    }
+
+
+
+    public static final class Builder {
+        private long counter;
+
+
+
+        public Builder() {
+        }
+
+        public Builder counter(long counter) {
+            this.counter = counter;
+            return this;
+        }
+
+        public MovieCounterDto build() {
+            return new MovieCounterDto(this);
+        }
+
     }
 }

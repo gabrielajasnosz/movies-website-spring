@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.edu.pwsztar.domain.dto.*;
 import pl.edu.pwsztar.domain.entity.Movie;
+import pl.edu.pwsztar.domain.mapper.Converter;
 import pl.edu.pwsztar.domain.mapper.MovieDetailsMapper;
 import pl.edu.pwsztar.domain.mapper.MovieListMapper;
 import pl.edu.pwsztar.domain.mapper.MovieMapper;
@@ -20,15 +21,15 @@ public class MovieServiceImpl implements MovieService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MovieServiceImpl.class);
 
     private final MovieRepository movieRepository;
-    private final MovieListMapper movieListMapper;
-    private final MovieMapper movieMapper;
-    private final MovieDetailsMapper movieDetailsMapper;
+    private final Converter< List<MovieDto>, List<Movie>> movieListMapper;
+    private final Converter<Movie, CreateMovieDto> movieMapper;
+    private final Converter<DetailsMovieDto,Movie> movieDetailsMapper;
 
     @Autowired
     public MovieServiceImpl(MovieRepository movieRepository,
-                            MovieListMapper movieListMapper,
-                            MovieMapper movieMapper,
-                            MovieDetailsMapper movieDetailsMapper) {
+                            Converter< List<MovieDto>, List<Movie> > movieListMapper,
+                            Converter<Movie, CreateMovieDto> movieMapper,
+                            Converter<DetailsMovieDto,Movie> movieDetailsMapper) {
 
         this.movieRepository = movieRepository;
         this.movieListMapper = movieListMapper;
@@ -38,13 +39,14 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<MovieDto> findAll() {
+
         List<Movie> movies = movieRepository.findByOrderByYearDesc();
-        return movieListMapper.mapToDto(movies);
+        return movieListMapper.convert(movies);
     }
 
     @Override
     public void creatMovie(CreateMovieDto createMovieDto) {
-        Movie movie = movieMapper.mapToEntity(createMovieDto);
+        Movie movie = movieMapper.convert(createMovieDto);
         movieRepository.save(movie);
     }
 
@@ -58,15 +60,15 @@ public class MovieServiceImpl implements MovieService {
         Movie movie = movieRepository.findOneByMovieId(movieId);
 
         if(movie == null) {
-            return new DetailsMovieDto();
+            return new DetailsMovieDto.Builder().build();
         }
 
-        return movieDetailsMapper.mapToDto(movie);
+        return movieDetailsMapper.convert(movie);
     }
 
     @Override
     public MovieCounterDto countMovies() {
-        return new MovieCounterDto(movieRepository.count());
+        return new MovieCounterDto.Builder().counter(movieRepository.count()).build();
     }
 
     @Override
@@ -74,11 +76,15 @@ public class MovieServiceImpl implements MovieService {
         Movie movie = movieRepository.findOneByMovieId(movieId);
 
         if(movie != null) {
-            movie.setImage(updateMovieDto.getImage());
-            movie.setTitle(updateMovieDto.getTitle());
-            movie.setVideoId(updateMovieDto.getVideoId());
-            movie.setYear(updateMovieDto.getYear());
-            movieRepository.save(movie);
+            Movie movieBuilder=new Movie.Builder()
+                    .movieId(movie.getMovieId())
+                    .title(updateMovieDto.getTitle())
+                    .image(updateMovieDto.getImage())
+                    .videoId(updateMovieDto.getVideoId())
+                    .year(updateMovieDto.getYear())
+                    .build();
+
+            movieRepository.save(movieBuilder);
         }
     }
 }

@@ -5,10 +5,20 @@ import java.io.Serializable;
 public class UpdateMovieDto implements Serializable {
     private String title;
     private String image;
+
     private Integer year;
     private String videoId;
 
+
     public UpdateMovieDto() {
+    }
+
+
+    private UpdateMovieDto(Builder builder) {
+        title = builder.title;
+        image = builder.image;
+        year = builder.year;
+        videoId = builder.videoId;
     }
 
     public String getTitle() {
@@ -35,5 +45,43 @@ public class UpdateMovieDto implements Serializable {
                 ", year=" + year +
                 ", videoId='" + videoId + '\'' +
                 '}';
+    }
+
+
+
+    public static final class Builder {
+        private String title;
+        private String image;
+        private Integer year;
+        private String videoId;
+
+
+        public Builder() {
+        }
+
+        public Builder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder image(String image) {
+            this.image = image;
+            return this;
+        }
+
+        public Builder year(Integer year) {
+            this.year = year;
+            return this;
+        }
+
+        public Builder videoId(String videoId) {
+            this.videoId = videoId;
+            return this;
+        }
+
+        public UpdateMovieDto build() {
+            return new UpdateMovieDto(this);
+        }
+
     }
 }
